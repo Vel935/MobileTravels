@@ -1,28 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:mobiletravels/providers/TripProvider.dart';
+import 'package:provider/provider.dart';
 
-class ExpensePage extends StatefulWidget {
-  @override
-  _ExpensePageState createState() => _ExpensePageState();
-}
-
-class _ExpensePageState extends State<ExpensePage> {
+class ExpensePage extends StatelessWidget {
   final _expenseController = TextEditingController();
   final _categoryController = TextEditingController();
-  List<Map<String, dynamic>> _expenses = [];
 
-  void _addExpense() {
-    setState(() {
-      _expenses.add({
-        'amount': double.parse(_expenseController.text),
-        'category': _categoryController.text,
-      });
-    });
+  void _addExpense(BuildContext context) {
+    final amount = double.parse(_expenseController.text);
+    final category = _categoryController.text;
+    Provider.of<TripProvider>(context, listen: false)
+        .addExpenseToCurrentTrip(amount, category);
     _expenseController.clear();
     _categoryController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentTrip = Provider.of<TripProvider>(context).currentTrip;
+    final expenses = currentTrip?.expenses ?? [];
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Gastos'),
@@ -42,16 +39,16 @@ class _ExpensePageState extends State<ExpensePage> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _addExpense,
+              onPressed: () => _addExpense(context),
               child: Text('Agregar Gasto'),
             ),
             Expanded(
               child: ListView.builder(
-                itemCount: _expenses.length,
+                itemCount: expenses.length,
                 itemBuilder: (context, index) {
                   return ListTile(
                     title: Text(
-                        '${_expenses[index]['category']}: \$${_expenses[index]['amount']}'),
+                        '${expenses[index]['category']}: \$${expenses[index]['amount']}'),
                   );
                 },
               ),

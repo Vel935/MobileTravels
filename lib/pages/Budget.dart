@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:mobiletravels/providers/TripProvider.dart';
+import 'package:provider/provider.dart';
 
-class BudgetPage extends StatefulWidget {
-  @override
-  _BudgetPageState createState() => _BudgetPageState();
-}
-
-class _BudgetPageState extends State<BudgetPage> {
+class BudgetPage extends StatelessWidget {
   final _budgetController = TextEditingController();
-  double _budget = 0.0;
 
-  void _saveBudget() {
-    setState(() {
-      _budget = double.parse(_budgetController.text);
-    });
+  void _saveBudget(BuildContext context) {
+    final budget = double.parse(_budgetController.text);
+    Provider.of<TripProvider>(context, listen: false)
+        .setBudgetForCurrentTrip(budget);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Presupuesto guardado: \$$_budget')),
+      SnackBar(
+          content:
+              Text('Presupuesto guardado: \$${budget.toStringAsFixed(2)}')),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentTrip = Provider.of<TripProvider>(context).currentTrip;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Presupuesto'),
@@ -30,13 +30,15 @@ class _BudgetPageState extends State<BudgetPage> {
           children: [
             TextField(
               controller: _budgetController,
-              decoration:
-                  InputDecoration(labelText: 'Introduce tu presupuesto'),
+              decoration: InputDecoration(
+                labelText: 'Introduce tu presupuesto',
+                hintText: currentTrip?.budget.toString() ?? '0.0',
+              ),
               keyboardType: TextInputType.number,
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _saveBudget,
+              onPressed: () => _saveBudget(context),
               child: Text('Guardar Presupuesto'),
             ),
           ],
